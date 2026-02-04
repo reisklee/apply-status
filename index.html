@@ -61,16 +61,17 @@
 
     /* modal header */
     .mHead{
-      height:56px;
-      background: linear-gradient(180deg, var(--blue) 0%, var(--blue2) 100%);
-      color:#fff;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:0 14px 0 16px;
-      font-weight:900;
-      letter-spacing:-.01em;
-    }
+  /* 높이 고정 대신 safe-area 포함 */
+  padding: calc(10px + env(safe-area-inset-top)) 14px 10px 12px;
+  background: linear-gradient(180deg, var(--blue) 0%, var(--blue2) 100%);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-weight:900;
+  letter-spacing:-.01em;
+}
+
     .mHead .title{
       display:flex; align-items:center; gap:10px;
       font-size:16px;
@@ -323,11 +324,38 @@
       font-weight:900;
       font-size:11px;
     }
+    .nav{display:flex; align-items:center; gap:10px;}
+.backBtn{
+  width:44px; height:40px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.35);
+  background: rgba(255,255,255,.12);
+  color:#fff;
+  font-size:18px;
+  font-weight:900;
+  cursor:pointer;
+}
+.backBtn:active{transform:scale(.98)}
+.navTitle{
+  font-size:16px;
+  font-weight:900;
+}
 
-    /* 작은 화면에서 추천 카드 세로로 */
+
+    /* 작은 화면에서 추천 카드 세로로 
     @media (max-width: 360px){
       .reco{grid-template-columns:1fr}
-    }
+    }*/
+    @media (max-width: 520px){
+  .overlay{ padding: 8px; }
+  .modal{ width: 100%; border-radius:20px; }
+}
+
+
+    
+
+
+    
   </style>
 </head>
 
@@ -342,9 +370,13 @@
   <div class="overlay" id="overlay">
     <div class="modal" role="dialog" aria-modal="true" aria-label="입사지원현황">
       <div class="mHead">
-        <div class="title">입사지원현황</div>
-        <div class="xBtn" id="closeBtn" aria-label="닫기">✕</div>
-      </div>
+  <div class="nav">
+    <button class="backBtn" id="backBtn" aria-label="뒤로가기">←</button>
+    <div class="navTitle">지원 현황</div>
+  </div>
+  <div style="width:44px"></div>
+</div>
+
 
       <!-- 기간 -->
       <div class="section">
@@ -509,6 +541,11 @@
     setActiveTab(current);
     renderList(current);
 
+    document.getElementById("backBtn").addEventListener("click", ()=>{
+  document.getElementById("overlay").style.display = "none";
+});
+
+
     el("tabs").addEventListener("click", (e)=>{
       const tab = e.target.closest(".tab");
       if(!tab) return;
@@ -525,10 +562,7 @@
       alert("기간조회 드롭다운(연습)\n여기서 날짜 선택 UI를 붙일 수 있어!");
     });
 
-    el("closeBtn").addEventListener("click", ()=>{
-      // 연습용: 닫기 시 숨김
-      document.getElementById("overlay").style.display = "none";
-    });
+    
 
     // 오버레이 배경 클릭 시 닫기(원하면 주석 해제)
     // document.getElementById("overlay").addEventListener("click", (e)=>{
@@ -537,3 +571,4 @@
   </script>
 </body>
 </html>
+
