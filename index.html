@@ -752,14 +752,15 @@ if(periodSelect){
 });
 
 
-   el("tabs").addEventListener("click", (e)=>{
+el("tabs").addEventListener("click", (e)=>{
   const tab = e.target.closest(".tab");
   if(!tab) return;
   current = tab.dataset.status;
   setActiveTab(current);
   renderCounts();
-  renderList(current);
+  renderAll();
 });
+
 
     el("certBtn").addEventListener("click", ()=>{
       alert("증명서 발급대상이 아닙니다.");
@@ -783,6 +784,7 @@ renderAll();
   </script>
 </body>
 </html>
+
 
 
 
