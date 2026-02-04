@@ -150,6 +150,24 @@
       user-select:none;
       white-space:nowrap;
     }
+
+
+    select.select{
+  appearance:none;
+  -webkit-appearance:none;
+  background:#fff;
+  padding-right:34px; /* 화살표 공간 */
+}
+select.select{
+  background-image: linear-gradient(45deg, transparent 50%, #6b7280 50%),
+                    linear-gradient(135deg, #6b7280 50%, transparent 50%);
+  background-position: calc(100% - 16px) 50%, calc(100% - 10px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat:no-repeat;
+}
+
+
+    
     .caret{
       width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #6b7280;
       transform: translateY(1px);
@@ -440,9 +458,14 @@
             <span><strong>조회기간</strong> | </span>
             <span class="dates" id="dateRange"></span>
           </div>
-          <div class="select" id="periodBtn">
-            <span>기간조회</span><span class="caret"></span>
-          </div>
+         <select class="select" id="periodSelect" aria-label="기간조회">
+  <option value="1">최근 1개월</option>
+  <option value="3" selected>최근 3개월</option>
+  <option value="6">최근 6개월</option>
+  <option value="12">최근 12개월</option>
+  <option value="all">전체</option>
+</select>
+
         </div>
 
         <!-- 탭 -->
@@ -542,6 +565,66 @@
       el("cCanceled").textContent = counts.canceled;
     }
 
+    function formatDateDot(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}.${m}.${day}`;
+}
+
+function parseDotDate(s){
+  // "2020.05.26" -> Date
+  const [y,m,d] = s.split(".").map(Number);
+  const dt = new Date(y, (m-1), d);
+  dt.setHours(0,0,0,0);
+  return dt;
+}
+
+function setDateRangeByMonths(monthsOrAll){
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  if(monthsOrAll === "all"){
+    // 전체: 데이터에서 가장 오래된 지원일 ~ 오늘
+    const minDate = items.reduce((min, x)=>{
+      const dt = parseDotDate(x.appliedAt);
+      return dt < min ? dt : min;
+    }, today);
+    document.getElementById("dateRange").textContent =
+      `${formatDateDot(minDate)} ~ ${formatDateDot(today)}`;
+    return { start: minDate, end: today };
+  }
+
+  const months = Number(monthsOrAll);
+  const start = new Date(today);
+  start.setMonth(today.getMonth() - months);
+
+  document.getElementById("dateRange").textContent =
+    `${formatDateDot(start)} ~ ${formatDateDot(today)}`;
+
+  return { start, end: today };
+}
+
+    let currentMonths = "3";              // 기본 3개월
+let currentRange = { start:null, end:null };
+
+function renderAll(){
+  currentRange = setDateRangeByMonths(currentMonths);
+
+  // ✅ (선택) 기간에 맞춰 리스트도 필터링하려면 아래 renderList를 이렇게 바꿔야 함
+  renderList(current); // 기존 호출 유지
+}
+
+const periodSelect = document.getElementById("periodSelect");
+if(periodSelect){
+  periodSelect.value = currentMonths;
+  periodSelect.addEventListener("change", (e)=>{
+    currentMonths = e.target.value;
+    renderAll();
+  });
+}
+
+
     function badgeText(status){
       if(status === "applied") return "진행중";
       if(status === "opened") return "열람";
@@ -551,7 +634,14 @@
     }
 
     function renderList(filterStatus){
-      const list = items.filter(x => x.status === filterStatus);
+      const list = items.filter(x => {
+    if(x.status !== filterStatus) return false;
+        
+  // 기간 필터
+    if(!currentRange?.start || !currentRange?.end) return true;
+    const dt = parseDotDate(x.appliedAt);
+    return dt >= currentRange.start && dt <= currentRange.end;
+  });
 
       const html = list.map(x => `
         <div class="item">
@@ -598,9 +688,10 @@
     // --- interactions ---
     let current = "applied";
 
-    renderCounts();
-    setActiveTab(current);
-    renderList(current);
+   renderCounts();
+setActiveTab(current);
+renderAll();
+
 
     document.getElementById("backBtn").addEventListener("click", ()=>{
   document.getElementById("overlay").style.display = "none";
@@ -651,6 +742,7 @@ setDefaultDateRange();
   </script>
 </body>
 </html>
+
 
 
 
