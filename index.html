@@ -438,7 +438,7 @@
         <div class="row">
           <div class="left">
             <span><strong>조회기간</strong> | </span>
-            <span class="dates" id="dateRange">2025-01-01 ~ 2026-02-16</span>
+            <span class="dates" id="dateRange"></span>
           </div>
           <div class="select" id="periodBtn">
             <span>기간조회</span><span class="caret"></span>
@@ -623,7 +623,26 @@
       alert("기간조회");
     });
 
-    
+    function formatDate(d){
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}.${m}.${day}`;
+}
+
+function setDefaultDateRange(){
+  const today = new Date();
+  const threeMonthsAgo = new Date();
+  threeMonthsAgo.setMonth(today.getMonth() - 3);
+
+  const start = formatDate(threeMonthsAgo);
+  const end = formatDate(today);
+
+  document.getElementById("dateRange").textContent = `${start} ~ ${end}`;
+}
+
+setDefaultDateRange();
+
 
     // 오버레이 배경 클릭 시 닫기(원하면 주석 해제)
     // document.getElementById("overlay").addEventListener("click", (e)=>{
@@ -632,6 +651,7 @@
   </script>
 </body>
 </html>
+
 
 
 
