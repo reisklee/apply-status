@@ -215,6 +215,20 @@
     .itemTop .meta{
       min-width:0;
       flex:1;
+
+      .rightTop{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  flex-shrink:0;
+}
+
+      
+.itemTop{
+  align-items:flex-start; /* 위 기준으로 */
+}
+
     }
     .company{
       font-weight:900;
@@ -512,11 +526,17 @@
       const html = list.map(x => `
         <div class="item">
           <div class="itemTop">
-            <div class="meta">
-              <span class="badge">${x.statusText}</span>
-              <p class="company">${x.company}</p>
-              <p class="job">${x.title}</p>
-            </div>
+  <div class="meta">
+    <p class="company">${x.company}</p>
+    <p class="job">${x.title}</p>
+  </div>
+
+  <div class="rightTop">
+    <span class="badge">${x.statusText}</span>
+    <a class="link" href="#" onclick="alert('이력서 보기(연습)');return false;">이력서 보기</a>
+  </div>
+</div>
+
             <a class="link" href="#" onclick="alert('이력서 보기(연습)');return false;">이력서 보기</a>
           </div>
 
@@ -529,10 +549,11 @@
             <div>${x.resume}</div>
           </div>
 
-          <div class="actions">
-            <button class="smallBtn" type="button" onclick="alert('지원자현황(연습)')">지원자현황</button>
-            <button class="smallBtn" type="button" onclick="alert('지원취소(연습)')">지원취소</button>
-          </div>
+         <div class="actions">
+  <button class="smallBtn" type="button" onclick="alert('이력서 보기(연습)')">이력서 보기</button>
+  <button class="smallBtn" type="button" onclick="alert('지원취소(연습)')">지원취소</button>
+</div>
+
         </div>
       `).join("");
 
@@ -582,6 +603,7 @@
   </script>
 </body>
 </html>
+
 
 
 
