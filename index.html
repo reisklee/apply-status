@@ -3,425 +3,537 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>지원 현황</title>
+  <title>입사지원현황 모달 UI (연습)</title>
   <style>
     :root{
-      --bg:#f6f7fb; --card:#fff; --text:#111827; --muted:#6b7280; --line:#e5e7eb;
-      --primary:#2563eb; --shadow:0 10px 26px rgba(17,24,39,.07); --radius:16px;
+      --bg:#eef2f6;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --blue:#2f86ff;
+      --blue2:#1f6fe6;
+      --shadow: 0 18px 40px rgba(0,0,0,.18);
+      --radius:18px;
       --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Apple SD Gothic Neo","Noto Sans KR", sans-serif;
-      --b-applied:#2563eb; --b-viewed:#0ea5e9; --b-wait:#f59e0b; --b-pass:#22c55e; --b-fail:#ef4444;
     }
     *{box-sizing:border-box}
-    body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font)}
-    .wrap{max-width:1120px;margin:0 auto;padding:22px}
-    header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
-    h1{margin:0;font-size:22px}
-    .sub{margin:6px 0 0;color:var(--muted);font-size:13px}
-    .topBtns{display:flex;gap:10px}
-    .btn{border:1px solid var(--line); background:#fff; padding:10px 12px;border-radius:12px; cursor:pointer; font-weight:700; font-size:13px}
-    .btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}
-    .grid{display:grid;grid-template-columns:320px 1fr;gap:14px}
-    @media (max-width: 900px){ .grid{grid-template-columns:1fr} }
-    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-    .hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-    .hd h2{margin:0;font-size:14px}
-    .bd{padding:14px 16px}
-    .metaRight{color:var(--muted);font-size:12px}
+    body{
+      margin:0; font-family:var(--font); color:var(--text); background:var(--bg);
+      min-height:100vh;
+    }
 
-    /* DEBUG BAR */
-    .debug{
-      margin:0 0 12px;
-      padding:10px 12px;
-      border-radius:14px;
+    /* background hero (just for vibe) */
+    .hero{
+      height:280px;
+      display:flex; align-items:center; justify-content:center;
+      background: radial-gradient(1200px 500px at 50% 20%, #ffffff 0%, #f2f6ff 35%, #e8f0ff 70%, #e9edf5 100%);
+      padding:32px 18px;
+      text-align:center;
+    }
+    .hero h1{
+      margin:0;
+      font-size:34px;
+      letter-spacing:-.02em;
+      line-height:1.2;
+      font-weight:900;
+    }
+    .hero h1 .thin{font-weight:400}
+    .hero p{margin:14px 0 0;color:var(--muted);font-size:14px}
+
+    /* overlay modal */
+    .overlay{
+      position:fixed; inset:0;
+      background: rgba(17,24,39,.32);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+    }
+    .modal{
+      width:min(520px, 100%);
+      background:var(--card);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.6);
+    }
+
+    /* modal header */
+    .mHead{
+      height:56px;
+      background: linear-gradient(180deg, var(--blue) 0%, var(--blue2) 100%);
+      color:#fff;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 14px 0 16px;
+      font-weight:900;
+      letter-spacing:-.01em;
+    }
+    .mHead .title{
+      display:flex; align-items:center; gap:10px;
+      font-size:16px;
+    }
+    .xBtn{
+      width:40px; height:40px;
+      border-radius:12px;
+      display:grid; place-items:center;
+      cursor:pointer;
+      border:1px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.12);
+      user-select:none;
+    }
+    .xBtn:active{transform:scale(.98)}
+
+    /* body sections */
+    .section{border-top:1px solid var(--line)}
+    .row{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 14px;
+      gap:12px;
+    }
+    .row .left{
+      display:flex; align-items:center; gap:10px;
+      min-width:0;
+      color:#374151;
+      font-size:13px;
+    }
+    .row .left strong{font-weight:900}
+    .row .left span{white-space:nowrap}
+    .row .left .dates{
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width: 260px;
+    }
+    .select{
+      display:flex; align-items:center; gap:8px;
+      padding:8px 10px;
       border:1px solid var(--line);
+      border-radius:12px;
+      font-size:13px;
       background:#fff;
       color:#111827;
-      font-size:13px;
+      cursor:pointer;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .caret{
+      width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #6b7280;
+      transform: translateY(1px);
+    }
+
+    /* tabs count row */
+    .tabs{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+      background:#fbfcff;
+    }
+    .tab{
+      padding:12px 8px 10px;
+      text-align:center;
+      font-size:12px;
+      color:#374151;
+      cursor:pointer;
+      user-select:none;
+      position:relative;
+    }
+    .tab:not(:last-child){border-right:1px solid var(--line)}
+    .tab .n{
+      margin-top:6px;
+      font-size:18px;
+      font-weight:900;
+      color:#111827;
+    }
+    .tab.active{
+      background:#ffffff;
+    }
+    .tab.active::after{
+      content:"";
+      position:absolute;
+      left:10px; right:10px; bottom:-1px;
+      height:3px;
+      border-radius:999px;
+      background: var(--blue);
+    }
+
+    /* big button */
+    .bigBtnWrap{padding:12px 14px}
+    .bigBtn{
+      width:100%;
+      border:none;
+      border-radius:14px;
+      padding:14px 14px;
+      background: linear-gradient(180deg, var(--blue) 0%, var(--blue2) 100%);
+      color:#fff;
+      font-weight:900;
+      letter-spacing:-.01em;
+      font-size:14px;
+      cursor:pointer;
+    }
+    .bigBtn:active{transform:scale(.99)}
+
+    /* list item */
+    .item{
+      padding:12px 14px;
+      border-top:1px solid var(--line);
+      background:#fff;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      font-weight:900;
+      background:#ecf3ff;
+      color:#165dcc;
+      border:1px solid #d8e7ff;
+      white-space:nowrap;
+    }
+    .itemTop{
       display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+    .itemTop .meta{
+      min-width:0;
+      flex:1;
+    }
+    .company{
+      font-weight:900;
+      font-size:14px;
+      margin:0 0 4px;
+      letter-spacing:-.01em;
+    }
+    .job{
+      margin:0;
+      color:#374151;
+      font-size:13px;
+      line-height:1.35;
+      letter-spacing:-.01em;
+    }
+
+    .kv{
+      margin-top:10px;
+      display:grid;
+      grid-template-columns:84px 1fr;
+      row-gap:8px;
+      column-gap:10px;
+      font-size:12px;
+      color:#374151;
+    }
+    .k{color:var(--muted)}
+    .inlinePill{
+      display:inline-flex;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid var(--line);
+      background:#fff;
+      font-size:11px;
+      font-weight:800;
+      color:#374151;
+      margin-left:6px;
+      transform: translateY(-1px);
+    }
+    .link{
+      color:var(--blue2);
+      font-weight:900;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .link:hover{text-decoration:underline}
+
+    .actions{
+      margin-top:12px;
+      display:flex;
+      gap:10px;
+    }
+    .smallBtn{
+      flex:1;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:10px 10px;
+      background:#fff;
+      font-weight:900;
+      font-size:13px;
+      cursor:pointer;
+    }
+    .smallBtn:active{transform:scale(.99)}
+
+    /* 추천 공고 영역 */
+    .subHead{
+      padding:12px 14px;
+      border-top:1px solid var(--line);
+      background:#fbfcff;
+      color:#374151;
+      font-weight:900;
+      font-size:13px;
+    }
+    .reco{
+      padding:12px 14px 16px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      background:#fbfcff;
+    }
+    .recoCard{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:#fff;
+      padding:12px;
+      min-height:110px;
+      display:flex;
+      flex-direction:column;
       justify-content:space-between;
       gap:10px;
-      flex-wrap:wrap;
     }
-    .debug b{font-weight:900}
-    .debug .ok{color:#16a34a}
-    .debug .bad{color:#dc2626}
-
-    .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .stat{border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff}
-    .stat .k{color:var(--muted);font-size:12px;margin-bottom:8px}
-    .stat .v{font-size:20px;font-weight:900}
-
-    label{display:block;color:var(--muted);font-size:12px;margin:0 0 6px}
-    input, select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:13px;outline:none}
-    .filters{display:grid;gap:10px}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    @media (max-width: 420px){ .row{grid-template-columns:1fr} }
-
-    .tablewrap{display:block;overflow:auto;-webkit-overflow-scrolling:touch}
-    table{width:100%;border-collapse:separate;border-spacing:0;min-width:860px}
-    th,td{padding:12px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
-    th{position:sticky;top:0;background:#fff;z-index:1;color:#374151;font-size:12px;text-align:left}
-    tr:hover td{background:#fafafa}
-    .company{font-weight:900}
-    .job{color:var(--muted);font-size:12px;margin-top:2px}
-
-    .badge{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid var(--line);background:#fff;white-space:nowrap}
-    .dot{width:8px;height:8px;border-radius:50%}
-    .b-applied .dot{background:var(--b-applied)}
-    .b-viewed  .dot{background:var(--b-viewed)}
-    .b-wait    .dot{background:var(--b-wait)}
-    .b-pass    .dot{background:var(--b-pass)}
-    .b-fail    .dot{background:var(--b-fail)}
-
-    .link{color:var(--primary);font-weight:800;text-decoration:none}
-    .link:hover{text-decoration:underline}
-    .muted{color:var(--muted)}
-
-    .mobileList{display:none;padding:10px 16px 16px}
-    .mcard{border:1px solid var(--line);border-radius:16px;background:#fff;padding:12px;margin-top:10px}
-    .mTop{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-    .mTitle{font-weight:900}
-    .mJob{color:var(--muted);font-size:12px;margin-top:4px;line-height:1.35}
-    .mMeta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:12px}
-    .mActions{display:flex;gap:10px;margin-top:10px}
-
-    @media (max-width: 900px){
-      .tablewrap{display:none}
-      .mobileList{display:block}
+    .recoCard .t{
+      font-weight:900;
+      font-size:13px;
+      letter-spacing:-.01em;
+      line-height:1.25;
+      margin:0;
+    }
+    .recoCard .d{
+      color:var(--muted);
+      font-size:12px;
+      margin:0;
+      line-height:1.35;
+    }
+    .dday{
+      font-weight:900;
+      font-size:12px;
+      color:#111827;
+      display:flex;
+      align-items:center;
+      gap:6px;
+    }
+    .dday .tag{
+      display:inline-flex;
+      padding:3px 8px;
+      border-radius:999px;
+      background:#f3f4f6;
+      border:1px solid var(--line);
+      color:#374151;
+      font-weight:900;
+      font-size:11px;
     }
 
-    .pager{border-top:1px solid var(--line);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-    .pagerInfo{color:var(--muted);font-size:12px}
-    .nums{display:flex;gap:6px;align-items:center}
-    .pagebtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:900}
-    .pagebtn.active{border-color:var(--primary);color:var(--primary)}
-    .pagebtn:disabled{opacity:.45;cursor:not-allowed}
-
-    .empty{padding:18px 16px;color:var(--muted);font-size:13px}
+    /* 작은 화면에서 추천 카드 세로로 */
+    @media (max-width: 360px){
+      .reco{grid-template-columns:1fr}
+    }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
-
-    <div class="debug" id="debug">
-      <span>디버그: <b class="bad">JS 아직 실행 안 됨</b></span>
-      <span>data: <b>?</b> / tbody: <b>?</b> / mobileList: <b>?</b></span>
+  <div class="hero">
+    <div>
+      <h1>이력서 작성 <span class="thin">및 수정</span><br/>입사지원현황까지 <span class="thin">한번에!</span></h1>
+      <p>연습용 UI: 모바일 모달 + 탭 + 리스트 + 추천공고</p>
     </div>
+  </div>
 
-    <header>
-      <div>
-        <h1>이력서 지원 현황</h1>
-        <p class="sub">PC는 테이블, 모바일은 카드로 자동 전환됩니다.</p>
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-label="입사지원현황">
+      <div class="mHead">
+        <div class="title">입사지원현황</div>
+        <div class="xBtn" id="closeBtn" aria-label="닫기">✕</div>
       </div>
-      <div class="topBtns">
-        <button class="btn" id="btnExport" type="button">내보내기</button>
-        <button class="btn primary" id="btnNew" type="button">지원 추가</button>
-      </div>
-    </header>
 
-    <div class="grid">
-      <!-- Left -->
-      <section class="card">
-        <div class="hd">
-          <h2>요약</h2>
-          <span class="metaRight" id="today"></span>
-        </div>
-        <div class="bd">
-          <div class="stats" id="stats"></div>
-
-          <div style="height:14px"></div>
-
-          <div class="filters">
-            <div>
-              <label>검색 (회사/공고)</label>
-              <input id="q" type="text" placeholder="예: 넥스트, UI 디자이너…" />
-            </div>
-
-            <div class="row">
-              <div>
-                <label>상태</label>
-                <select id="status">
-                  <option value="all">전체</option>
-                  <option value="applied">지원완료</option>
-                  <option value="viewed">열람</option>
-                  <option value="wait">진행중</option>
-                  <option value="pass">서류합격</option>
-                  <option value="fail">불합격</option>
-                </select>
-              </div>
-              <div>
-                <label>기간</label>
-                <select id="period">
-                  <option value="all">전체</option>
-                  <option value="7">최근 7일</option>
-                  <option value="30">최근 30일</option>
-                  <option value="90">최근 90일</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row">
-              <div>
-                <label>정렬</label>
-                <select id="sort">
-                  <option value="appliedDesc">지원일 최신순</option>
-                  <option value="appliedAsc">지원일 오래된순</option>
-                  <option value="deadlineAsc">마감 빠른순</option>
-                  <option value="companyAsc">회사명 가나다순</option>
-                </select>
-              </div>
-              <div>
-                <label>페이지당</label>
-                <select id="pageSize">
-                  <option value="8">8</option>
-                  <option value="12" selected>12</option>
-                  <option value="20">20</option>
-                </select>
-              </div>
-            </div>
+      <!-- 기간 -->
+      <div class="section">
+        <div class="row">
+          <div class="left">
+            <span><strong>조회기간</strong> | </span>
+            <span class="dates" id="dateRange">2020-02-27 ~ 2020-05-27</span>
           </div>
-
-          <p class="sub" style="margin-top:12px">
-            “상세”는 지금 알림만 띄우는 샘플이야. 원하면 오른쪽 슬라이드 패널로 바꿔줄게.
-          </p>
-        </div>
-      </section>
-
-      <!-- Right -->
-      <section class="card">
-        <div class="hd">
-          <h2>지원 리스트</h2>
-          <span class="metaRight" id="count"></span>
+          <div class="select" id="periodBtn">
+            <span>기간조회</span><span class="caret"></span>
+          </div>
         </div>
 
-        <div class="tablewrap">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:280px">회사 / 공고</th>
-                <th style="width:110px">지원일</th>
-                <th style="width:110px">마감일</th>
-                <th style="width:120px">상태</th>
-                <th style="width:120px">이력서</th>
-                <th style="width:140px">액션</th>
-              </tr>
-            </thead>
-            <tbody id="tbody"></tbody>
-          </table>
-          <div class="empty" id="emptyDesktop" style="display:none;">조건에 맞는 항목이 없습니다.</div>
+        <!-- 탭 -->
+        <div class="tabs" id="tabs">
+          <div class="tab active" data-status="applied">지원완료<div class="n" id="cApplied">2</div></div>
+          <div class="tab" data-status="opened">열람<div class="n" id="cOpened">1</div></div>
+          <div class="tab" data-status="unopened">미열람<div class="n" id="cUnopened">1</div></div>
+          <div class="tab" data-status="canceled">지원취소<div class="n" id="cCanceled">0</div></div>
         </div>
 
-        <div class="mobileList" id="mobileList"></div>
-        <div class="empty" id="emptyMobile" style="display:none;">조건에 맞는 항목이 없습니다.</div>
-
-        <div class="pager">
-          <div class="pagerInfo" id="pagerInfo"></div>
-          <div class="nums" id="pagerNums"></div>
+        <!-- 큰 버튼 -->
+        <div class="bigBtnWrap">
+          <button class="bigBtn" id="certBtn">취업활동 증명서 발급하기</button>
         </div>
-      </section>
+      </div>
+
+      <!-- 지원 리스트 -->
+      <div class="section" id="listArea">
+        <!-- JS로 렌더 -->
+      </div>
+
+      <!-- 추천 공고 -->
+      <div class="subHead">이 공고와 함께 본 공고</div>
+      <div class="reco">
+        <div class="recoCard">
+          <div>
+            <p class="t">쿠팡 주식회사</p>
+            <p class="d">쿠팡 이커머스 경력직 공개채용 - 서비스기획, 마케팅,영업, 물류, 개발</p>
+          </div>
+          <div class="dday"><span class="tag">D-7</span><span>마감 임박</span></div>
+        </div>
+        <div class="recoCard">
+          <div>
+            <p class="t">삼성물산</p>
+            <p class="d">모바일 이커머스 서비스 모집</p>
+          </div>
+          <div class="dday"><span class="tag">D-5</span><span>마감 임박</span></div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    window.addEventListener("DOMContentLoaded", () => {
-      // 샘플 데이터
-      const data = [
-        { company:"넥스트게임즈", job:"게임 UI 디자이너", applied:"2026-01-28", deadline:"2026-02-10", status:"applied", resume:"UI-2026-v3" },
-        { company:"루미나스", job:"UX/UI 디자이너(주니어)", applied:"2026-01-25", deadline:"2026-02-08", status:"viewed", resume:"UI-2026-v2" },
-        { company:"블루픽셀", job:"모바일 게임 UI", applied:"2026-01-20", deadline:"2026-02-05", status:"wait", resume:"UI-2026-v2" },
-        { company:"메테오스튜디오", job:"캐주얼 RPG UI/UX", applied:"2026-01-16", deadline:"2026-02-01", status:"fail", resume:"UI-2026-v1" },
-        { company:"오로라랩", job:"UI 디자이너", applied:"2026-01-12", deadline:"2026-02-15", status:"pass", resume:"UI-2026-v3" },
-        { company:"하이브릿지", job:"프로덕트 디자이너", applied:"2026-01-07", deadline:"2026-01-31", status:"wait", resume:"UI-2026-v1" },
-        { company:"스카이웍스", job:"게임 클라이언트 UI", applied:"2025-12-28", deadline:"2026-01-20", status:"fail", resume:"UI-2026-v1" },
-        { company:"제로원", job:"웹 UI 디자이너", applied:"2025-12-22", deadline:"2026-01-25", status:"applied", resume:"UI-2026-v1" },
-        { company:"캔버스팩토리", job:"UI 아티스트", applied:"2025-12-18", deadline:"2026-01-10", status:"viewed", resume:"UI-2026-v1" },
-        { company:"소프트코어", job:"UI/GUI 디자이너", applied:"2025-12-10", deadline:"2026-01-05", status:"wait", resume:"UI-2026-v1" },
-        { company:"엔진포지", job:"게임 UI/UX", applied:"2025-12-06", deadline:"2026-01-12", status:"applied", resume:"UI-2026-v1" },
-        { company:"라이트버스", job:"UI 디자이너", applied:"2025-12-01", deadline:"2026-01-18", status:"fail", resume:"UI-2026-v1" }
-      ];
-
-      const statusMeta = {
-        applied: { label:"지원완료", cls:"b-applied" },
-        viewed:  { label:"열람", cls:"b-viewed"  },
-        wait:    { label:"진행중", cls:"b-wait"   },
-        pass:    { label:"서류합격", cls:"b-pass"  },
-        fail:    { label:"불합격", cls:"b-fail"    }
-      };
-
-      const $ = (id) => document.getElementById(id);
-
-      // ✅ 디버그 표시: 여기 뜨면 JS는 확실히 실행된 것
-      const dbg = $("debug");
-      dbg.innerHTML = `
-        <span>디버그: <b class="ok">✅ JS 실행됨</b></span>
-        <span>data: <b>${data.length}</b> / tbody: <b>${!!$("tbody")}</b> / mobileList: <b>${!!$("mobileList")}</b></span>
-      `;
-
-      // state
-      const state = { q:"", status:"all", period:"all", sort:"appliedDesc", page:1, pageSize:12 };
-
-      const fmt = (d)=> d.replaceAll("-", ".");
-      function daysFromToday(dateStr){
-        const today = new Date(); today.setHours(0,0,0,0);
-        const d = new Date(dateStr); d.setHours(0,0,0,0);
-        return Math.floor((today - d) / (1000*60*60*24));
+    // --- 연습용 데이터 (스크린샷 느낌) ---
+    const items = [
+      {
+        status: "applied",
+        statusText: "진행중 (~6/02)",
+        company: "잡코리아",
+        title: "잡코리아 UX/UI 디자이너 채용",
+        appliedAt: "2020.05.26",
+        opened: false,
+        resume: "UX/UI 디자이너 및 퍼블리싱, 서비스기획"
+      },
+      {
+        status: "applied",
+        statusText: "진행중 (~6/10)",
+        company: "블루픽셀",
+        title: "모바일 게임 UI 디자이너",
+        appliedAt: "2020.05.21",
+        opened: true,
+        resume: "게임 UI/UX 포트폴리오 v2"
+      },
+      {
+        status: "opened",
+        statusText: "열람 (5/28)",
+        company: "오로라랩",
+        title: "프로덕트 디자이너",
+        appliedAt: "2020.05.20",
+        opened: true,
+        resume: "UI 디자이너 이력서 v1"
+      },
+      {
+        status: "unopened",
+        statusText: "미열람",
+        company: "메테오스튜디오",
+        title: "캐주얼 RPG UI/UX",
+        appliedAt: "2020.05.18",
+        opened: false,
+        resume: "UI 디자이너 이력서 v1"
       }
+    ];
 
-      function applyFilters(items){
-        let out = [...items];
+    const counts = {
+      applied: 2,
+      opened: 1,
+      unopened: 1,
+      canceled: 0
+    };
 
-        if(state.q.trim()){
-          const q = state.q.trim().toLowerCase();
-          out = out.filter(x => (x.company + " " + x.job).toLowerCase().includes(q));
-        }
-        if(state.status !== "all") out = out.filter(x => x.status === state.status);
+    const el = (id)=>document.getElementById(id);
 
-        if(state.period !== "all"){
-          const p = Number(state.period);
-          out = out.filter(x => {
-            const diff = daysFromToday(x.applied);
-            return diff >= 0 && diff <= p;
-          });
-        }
+    function renderCounts(){
+      el("cApplied").textContent = counts.applied;
+      el("cOpened").textContent = counts.opened;
+      el("cUnopened").textContent = counts.unopened;
+      el("cCanceled").textContent = counts.canceled;
+    }
 
-        out.sort((a,b)=>{
-          if(state.sort === "appliedDesc") return b.applied.localeCompare(a.applied);
-          if(state.sort === "appliedAsc")  return a.applied.localeCompare(b.applied);
-          if(state.sort === "deadlineAsc") return a.deadline.localeCompare(b.deadline);
-          if(state.sort === "companyAsc")  return a.company.localeCompare(b.company, "ko");
-          return 0;
-        });
+    function badgeText(status){
+      if(status === "applied") return "진행중";
+      if(status === "opened") return "열람";
+      if(status === "unopened") return "미열람";
+      if(status === "canceled") return "지원취소";
+      return status;
+    }
 
-        return out;
-      }
+    function renderList(filterStatus){
+      const list = items.filter(x => x.status === filterStatus);
 
-      function paginate(items){
-        const total = items.length;
-        const pageSize = Number(state.pageSize);
-        const totalPages = Math.max(1, Math.ceil(total / pageSize));
-        state.page = Math.min(state.page, totalPages);
-
-        const start = (state.page - 1) * pageSize;
-        const end = start + pageSize;
-        return { pageItems: items.slice(start, end), total, totalPages, start, end };
-      }
-
-      function renderStats(filtered){
-        const counts = { all: filtered.length, wait:0, pass:0, fail:0, viewed:0, applied:0 };
-        filtered.forEach(x => counts[x.status]++);
-        const stats = [
-          { k:"총 지원", v:counts.all },
-          { k:"진행중", v:counts.wait + counts.applied + counts.viewed },
-          { k:"서류합격", v:counts.pass },
-          { k:"불합격", v:counts.fail }
-        ];
-        $("stats").innerHTML = stats.map(s=>`
-          <div class="stat"><div class="k">${s.k}</div><div class="v">${s.v}</div></div>
-        `).join("");
-      }
-
-      function renderTable(pageItems){
-        const tbody = $("tbody");
-        tbody.innerHTML = pageItems.map(x=>{
-          const meta = statusMeta[x.status];
-          return `
-            <tr>
-              <td><div class="company">${x.company}</div><div class="job">${x.job}</div></td>
-              <td>${fmt(x.applied)}</td>
-              <td>${fmt(x.deadline)}</td>
-              <td><span class="badge ${meta.cls}"><span class="dot"></span>${meta.label}</span></td>
-              <td class="muted">${x.resume}</td>
-              <td>
-                <a class="link" href="#" onclick="alert('상세보기(샘플)');return false;">상세</a>
-                <span class="muted"> · </span>
-                <a class="link" href="#" onclick="alert('지원취소(샘플)');return false;">취소</a>
-              </td>
-            </tr>
-          `;
-        }).join("");
-      }
-
-      function renderMobileCards(pageItems){
-        $("mobileList").innerHTML = pageItems.map(x=>{
-          const meta = statusMeta[x.status];
-          return `
-            <div class="mcard">
-              <div class="mTop">
-                <div>
-                  <div class="mTitle">${x.company}</div>
-                  <div class="mJob">${x.job}</div>
-                </div>
-                <span class="badge ${meta.cls}"><span class="dot"></span>${meta.label}</span>
-              </div>
-              <div class="mMeta">
-                <div>지원일: <b>${fmt(x.applied)}</b></div>
-                <div>마감일: <b>${fmt(x.deadline)}</b></div>
-                <div>이력서: <b>${x.resume}</b></div>
-              </div>
-              <div class="mActions">
-                <a class="link" href="#" onclick="alert('상세보기(샘플)');return false;">상세</a>
-                <a class="link" href="#" onclick="alert('지원취소(샘플)');return false;">취소</a>
-              </div>
+      const html = list.map(x => `
+        <div class="item">
+          <div class="itemTop">
+            <div class="meta">
+              <span class="badge">${x.statusText}</span>
+              <p class="company">${x.company}</p>
+              <p class="job">${x.title}</p>
             </div>
-          `;
-        }).join("");
-      }
+            <a class="link" href="#" onclick="alert('이력서 보기(연습)');return false;">이력서 보기</a>
+          </div>
 
-      function renderPager(total, totalPages, start, end){
-        $("count").textContent = `총 ${total}건`;
-        $("pagerInfo").textContent = `${total === 0 ? 0 : (start+1)}-${Math.min(end,total)} / ${total}건`;
+          <div class="kv">
+            <div class="k">지원일</div>
+            <div>${x.appliedAt}
+              ${x.opened ? `<span class="inlinePill">열람</span>` : `<span class="inlinePill">미열람</span>`}
+            </div>
+            <div class="k">지원이력서</div>
+            <div>${x.resume}</div>
+          </div>
 
-        const max = 7;
-        let s = Math.max(1, state.page - 3);
-        let e = Math.min(totalPages, s + (max - 1));
-        s = Math.max(1, e - (max - 1));
+          <div class="actions">
+            <button class="smallBtn" type="button" onclick="alert('지원자현황(연습)')">지원자현황</button>
+            <button class="smallBtn" type="button" onclick="alert('지원취소(연습)')">지원취소</button>
+          </div>
+        </div>
+      `).join("");
 
-        let html = `<button class="pagebtn" ${state.page===1?"disabled":""} data-page="${state.page-1}">‹</button>`;
-        for(let p=s;p<=e;p++){
-          html += `<button class="pagebtn ${p===state.page?"active":""}" data-page="${p}">${p}</button>`;
-        }
-        html += `<button class="pagebtn" ${state.page===totalPages?"disabled":""} data-page="${state.page+1}">›</button>`;
-        $("pagerNums").innerHTML = html;
+      el("listArea").innerHTML = html || `<div class="item"><p style="margin:0;color:#6b7280;font-size:13px">항목이 없습니다.</p></div>`;
+    }
 
-        $("pagerNums").querySelectorAll("button[data-page]").forEach(btn=>{
-          btn.addEventListener("click", ()=>{
-            state.page = Number(btn.dataset.page);
-            render();
-          });
-        });
-      }
+    function setActiveTab(status){
+      document.querySelectorAll(".tab").forEach(t=>{
+        t.classList.toggle("active", t.dataset.status === status);
+      });
+    }
 
-      function setEmpty(total){
-        $("emptyDesktop").style.display = total === 0 ? "block" : "none";
-        $("emptyMobile").style.display  = total === 0 ? "block" : "none";
-      }
+    // --- interactions ---
+    let current = "applied";
 
-      function render(){
-        const filtered = applyFilters(data);
-        renderStats(filtered);
-        const { pageItems, total, totalPages, start, end } = paginate(filtered);
-        setEmpty(total);
-        renderTable(pageItems);
-        renderMobileCards(pageItems);
-        renderPager(total, totalPages, start, end);
-      }
+    renderCounts();
+    setActiveTab(current);
+    renderList(current);
 
-      // inputs
-      $("q").addEventListener("input", (e)=>{ state.q = e.target.value; state.page=1; render(); });
-      $("status").addEventListener("change",(e)=>{ state.status = e.target.value; state.page=1; render(); });
-      $("period").addEventListener("change",(e)=>{ state.period = e.target.value; state.page=1; render(); });
-      $("sort").addEventListener("change",(e)=>{ state.sort = e.target.value; state.page=1; render(); });
-      $("pageSize").addEventListener("change",(e)=>{ state.pageSize = Number(e.target.value); state.page=1; render(); });
-
-      $("btnExport").addEventListener("click", ()=> alert("내보내기(샘플)"));
-      $("btnNew").addEventListener("click", ()=> alert("지원 추가(샘플)"));
-
-      const now = new Date();
-      $("today").textContent = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,"0")}.${String(now.getDate()).padStart(2,"0")}`;
-
-      render();
+    el("tabs").addEventListener("click", (e)=>{
+      const tab = e.target.closest(".tab");
+      if(!tab) return;
+      current = tab.dataset.status;
+      setActiveTab(current);
+      renderList(current);
     });
+
+    el("certBtn").addEventListener("click", ()=>{
+      alert("증명서 발급하기(연습)");
+    });
+
+    el("periodBtn").addEventListener("click", ()=>{
+      alert("기간조회 드롭다운(연습)\n여기서 날짜 선택 UI를 붙일 수 있어!");
+    });
+
+    el("closeBtn").addEventListener("click", ()=>{
+      // 연습용: 닫기 시 숨김
+      document.getElementById("overlay").style.display = "none";
+    });
+
+    // 오버레이 배경 클릭 시 닫기(원하면 주석 해제)
+    // document.getElementById("overlay").addEventListener("click", (e)=>{
+    //   if(e.target.id === "overlay") e.target.style.display = "none";
+    // });
   </script>
 </body>
 </html>
