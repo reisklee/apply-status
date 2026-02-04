@@ -42,14 +42,19 @@
     .hero p{margin:14px 0 0;color:var(--muted);font-size:14px}
 
     /* overlay modal */
-    .overlay{
-      position:fixed; inset:0;
-      background: rgba(17,24,39,.32);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:16px;
-    }
+   .overlay{
+  position:fixed; inset:0;
+  background: rgba(17,24,39,.32);
+  display:flex;
+
+  /* ⬇️ 여기 핵심: 위에서 시작 */
+  align-items:flex-start;
+  justify-content:center;
+
+  /* ⬇️ 노치 safe-area만큼 위 여백 확보 */
+  padding: calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
+}
+
     .modal{
       width:min(520px, 100%);
       background:var(--card);
@@ -57,6 +62,10 @@
       box-shadow:var(--shadow);
       overflow:hidden;
       border:1px solid rgba(255,255,255,.6);
+
+       max-height: calc(100dvh - (24px + env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
     }
 
     /* modal header */
@@ -347,7 +356,7 @@
       .reco{grid-template-columns:1fr}
     }*/
     @media (max-width: 520px){
-  .overlay{ padding: 8px; }
+   padding: 8px; }
   .modal{ width: 100%; border-radius:20px; }
 }
 
@@ -571,4 +580,5 @@
   </script>
 </body>
 </html>
+
 
